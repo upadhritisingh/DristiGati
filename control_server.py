@@ -142,6 +142,7 @@ def report_detection():
     })
 
 
+
 # ---------------- HUMAN DECISION ----------------
 
 @app.post("/api/decision")
@@ -158,29 +159,41 @@ def receive_decision():
         }), 400
 
     with lock:
-        if state["mode"] != "WAITING_FOR_HUMAN":
-            return jsonify({
-                "error": "No pending detection requires confirmation"
-            }), 409
+        current_mode = state["mode"]
 
-        state["decision"] = decision
-
+        # GREEN: confirm a detection OR resume from hold
         if decision == "GREEN":
+            if current_mode not in ["WAITING_FOR_HUMAN", "ON_HOLD"]:
+                return jsonify({
+                    "error": "Mission is not awaiting confirmation or on hold",
+                    "mode": current_mode
+                }), 409
+
+            state["decision"] = "GREEN"
             state["mode"] = "SCANNING"
             state["person_detected"] = False
             state["detection_zone"] = None
 
-        else:
+        # HOLD: only valid when a detection awaits confirmation
+        elif decision == "HOLD":
+            if current_mode != "WAITING_FOR_HUMAN":
+                return jsonify({
+                    "error": "No pending detection to hold",
+                    "mode": current_mode
+                }), 409
+
+            state["decision"] = "HOLD"
             state["mode"] = "ON_HOLD"
 
+        new_mode = state["mode"]
+
     print(f"Operator decision received: {decision}")
-    print(f"Current mode: {state['mode']}")
+    print(f"Current mode: {new_mode}")
 
     return jsonify({
         "message": "Decision received",
-        "mode": state["mode"]
+        "mode": new_mode
     })
-
 
 # ---------------- START SERVER ----------------
 
@@ -193,7 +206,7 @@ if __name__ == "__main__":
     # Hide routine HTTP request logs from the terminal
     logging.getLogger("werkzeug").setLevel(logging.WARNING)
     app.run(
-        host="127.0.0.1",
+        host="0.0.0.0",
         port=5000,
         debug=False,
         threaded=True
