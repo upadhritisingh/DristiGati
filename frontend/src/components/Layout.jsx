@@ -4,7 +4,7 @@ import {demoTime} from '../data/mockData.js'
 import Toast from './Toast.jsx'
 
 const nav=[['dashboard','Dashboard',LayoutDashboard],['mission','Mission',Target],['camera','Camera / Vision',Video],['map','Map',MapIcon],['settings','Settings',Settings]]
-export const Logo=()=><div className="logo"><span className="logo-mark"><Crosshair size={20}/></span><span><b>Dṛṣṭigati</b><small>Autonomous Reconnaissance System</small></span></div>
+export const Logo=()=><div className="logo"><span className="logo-mark"><Crosshair size={20}/></span><span><b>Dristigati</b><small>Autonomous Reconnaissance System</small></span></div>
 
 export default function Layout({page,setPage,toasts,children,settings}){
   const [open,setOpen]=useState(false)
