@@ -1,3 +1,4 @@
+
 import os
 import time
 import threading
@@ -67,6 +68,7 @@ def report_person_detection(zone):
     except requests.RequestException as error:
         print(f"Could not report detection: {error}")
         return False
+
 
 # ---------------- VIDEO UPLOAD THREAD ----------------
 
@@ -307,5 +309,7 @@ def main():
         cv2.destroyAllWindows()
         upload_thread.join(timeout=2)
         print("DristiGati brain stopped.")
+
+
 if __name__ == "__main__":
     main()
