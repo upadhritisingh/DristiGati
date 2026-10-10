@@ -24,6 +24,41 @@ export default function App(){
   const [alert,setAlert]=useState(null)
   const [seen,setSeen]=useState(false)
 
+  
+  const [backendStatus, setBackendStatus] = useState(null);
+
+  useEffect(() => {
+    const checkStatus = async () => {
+      try {
+        const response = await fetch('http://127.0.0.1:3001/api/status');
+        if (!response.ok) return;
+
+        const data = await response.json();
+        setBackendStatus(data);
+
+        if (
+          data.person_detected === true &&
+          data.mode === 'WAITING_FOR_HUMAN'
+        ) {
+          setAlert((current) => current ?? {
+            conf: 92,
+            x: data.detection_zone ?? 'Unknown',
+            y: '—',
+          });
+        } else {
+          setAlert(null);
+        }
+      } catch (error) {
+        console.error('Backend status check failed:', error);
+      }
+    };
+
+    checkStatus();
+    const id = setInterval(checkStatus, 2000);
+    return () => clearInterval(id);
+  }, []);
+
+
   const toast=useCallback(m=>{const id=Math.random();setToasts(t=>[...t,{id,m}]);setTimeout(()=>setToasts(t=>t.filter(x=>x.id!==id)),3200)},[])
   const log=useCallback((m,k='info')=>{setTick(n=>{setLogs(l=>[{t:fmt(n),m,k},...l]);return n+1})},[])
   const act=(s,m,k,tm)=>{setStatus(s);log(m,k);toast(tm||m)}
@@ -39,8 +74,6 @@ const raise=()=>{
   log('Person detected at (4.2, 7.8) with 92% confidence','danger')
   if(settings.alerts)setAlert(detections[0]); else toast('Person detected (alerts are off).')
 }
-useEffect(()=>{if(!seen&&status==='SEARCHING'&&progress>=65){setSeen(true);raise()}})
-useEffect(()=>{if(!seen&&status==='SEARCHING'&&progress>=65){setSeen(true);raise()}})
   const sim={raise,status,progress,logs,settings,cam,objectives,detections,
     toggleSetting:k=>setSettings(s=>({...s,[k]:!s[k]})),
     setCam:p=>setCam(c=>({...c,...p})),toast,go:setPage,
@@ -48,9 +81,48 @@ useEffect(()=>{if(!seen&&status==='SEARCHING'&&progress>=65){setSeen(true);raise
     start:()=>{setProgress(p=>p>=100?0:p);act('SEARCHING','Mission started.','ok')},
     pause:()=>status==='ABORTED'?toast('Mission aborted. Start a new mission.'):act('PAUSED','Mission paused by operator.','warn'),
     resume:()=>['PAUSED','HOLDING'].includes(status)?act('SEARCHING','Mission resumed.','ok'):toast('Mission is not paused.'),
-    holdCamera:()=>{setAlert(null);act('HOLDING','Operator held camera on target (4.2, 7.8). Robot paused.','warn','Camera held on target')},
-    continueMission:()=>{setAlert(null);log('Operator chose to continue mission.','ok');toast('Continuing mission')},
-    abort:()=>act('ABORTED','Mission aborted by operator.','danger')}
+    
+    holdCamera: async () => {
+      try {
+        const response = await fetch('http://127.0.0.1:3001/api/decision', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ decision: 'HOLD' }),
+        });
+
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || 'Hold failed');
+
+        setAlert(null);
+        setStatus('HOLDING');
+        log('Backend confirmed HOLD. Camera held on target.', 'warn');
+        toast('Camera held on target');
+      } catch (error) {
+        toast('Hold failed: ' + error.message);
+      }
+    },
+
+    continueMission: async () => {
+      try {
+        const response = await fetch('http://127.0.0.1:3001/api/decision', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ decision: 'GREEN' }),
+        });
+
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || 'Continue failed');
+
+        setAlert(null);
+        setStatus('SEARCHING');
+        setCam({ playing: true, scanning: true });
+        log('Backend confirmed GREEN. Mission resumed.', 'ok');
+        toast('Mission resumed');
+      } catch (error) {
+        toast('Continue failed: ' + error.message);
+      }
+    },
+  abort:()=>act('ABORTED','Mission aborted by operator.','danger')}
 
   const Page=pages[page]
   return <Layout page={page} setPage={setPage} toasts={toasts} status={status} settings={settings}><Page s={sim}/>{alert&&<DetectionAlert d={alert} s={sim}/>}</Layout>
