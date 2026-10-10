@@ -23,6 +23,29 @@ if (!BACKEND_URL || !API_SECRET) {
   );
 }
 
+
+ // ---------------- BACKEND STATUS ----------------
+
+app.get("/api/status", async (req, res) => {
+  try {
+    const upstream = await fetch(`${BACKEND_URL}/api/status`, {
+      method: "GET",
+      headers: {
+        "X-API-Secret": API_SECRET
+      },
+      signal: AbortSignal.timeout(5000)
+    });
+
+    const data = await upstream.json();
+    return res.status(upstream.status).json(data);
+  } catch (error) {
+    console.error("Status proxy failed:", error.message);
+    return res.status(502).json({
+      error: "Could not connect to DristiGati backend"
+    });
+  }
+});
+
 // ---------------- GREEN / HOLD DECISIONS ----------------
 
 app.post("/api/decision", async (req, res) => {
@@ -66,8 +89,7 @@ app.get("/api/video", async (req, res) => {
         method: "GET",
         headers: {
           "X-API-Secret": API_SECRET
-        },
-        signal: AbortSignal.timeout(15000)
+        }
       }
     );
 
