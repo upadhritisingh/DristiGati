@@ -1,4 +1,4 @@
-# NOTICE — DristiGati
+# NOTICE - DristiGati
 
 **Project:** DristiGati - Autonomy Beyond the Map  
 **Developed for:** Hack in Hills '26
