@@ -1,6 +1,6 @@
 # NOTICE — DristiGati
 
-**Project:** DristiGati — Autonomy Beyond the Map  
+**Project:** DristiGati - Autonomy Beyond the Map  
 **Developed for:** Hack in Hills '26
 
 ## Copyright Notice
@@ -29,4 +29,4 @@ For permission to reuse, redistribute, or commercially use original DristiGati m
 
 ---
 
-*DristiGati — Autonomy Beyond the Map.*
+*DristiGati - Autonomy Beyond the Map.*
