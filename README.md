@@ -1,4 +1,4 @@
-# DristiGati — Autonomy Beyond the Map
+# DristiGati - Autonomy Beyond the Map
 
 **Vision-Based Autonomous Robot for Search and Rescue**
 
@@ -25,7 +25,7 @@ DristiGati combines a dashboard, a Python backend, vision-processing modules, an
 
 Explore the DristiGati hardware simulation:
 
-**[Open the DristiGati Tinkercad Circuit](https://www.tinkercad.com/things/38MJ6aRbAsh/editel?returnTo=%2Fdashboard%2Ftutorials&sharecode=RdDsthyedUogm1xrRxi0BJMlIeP5r4yZt-Sz2ePH8F8)**
+**[DristiGati Tinkercad Circuit](https://www.tinkercad.com/things/38MJ6aRbAsh/editel?returnTo=%2Fdashboard%2Ftutorials&sharecode=RdDsthyedUogm1xrRxi0BJMlIeP5r4yZt-Sz2ePH8F8)**
 
 Access depends on the circuit's Tinkercad sharing permissions. If the link requests an account or edit access, the owner may need to adjust the sharing settings.
 
